@@ -45,6 +45,8 @@ Route::group(['middleware' => 'auth:api'], function() {
     //RUTAS ADMIN
     require __DIR__.'/rutasAdmin.php';
 
+
+
     //RUTAS PERSONAL
     require __DIR__.'/rutasPersonal.php';
 });
