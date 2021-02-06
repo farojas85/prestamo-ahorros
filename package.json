@@ -12,7 +12,7 @@
     },
     "engines": {
         "node": "14.x"
-      },
+    },
     "devDependencies": {
         "axios": "^0.19",
         "bootstrap": "^4.0.0",
