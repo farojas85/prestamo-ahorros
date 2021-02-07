@@ -114,3 +114,12 @@ Route::get('estado-operacion-habilitados','API\EstadoOPeracionController@habilit
 Route::get('estado-operacion-eliminados','API\EstadoOPeracionController@eliminados')->name('estado-operaciones.eliminados');
 Route::post('estado-operacion-destroy-temporal','API\EstadoOPeracionController@destroyTemporal')->name('estado-operaciones.destroy-temporal');
 Route::post('estado-operacion-restaurar','API\EstadoOPeracionController@restaurar')->name('estado-operaciones.restaurar');
+
+//RUTAS PERMISOS
+Route::get('cliente-todos','API\ClienteController@todos')->name('clientes.todos');
+Route::get('cliente-habilitados','API\ClienteController@habilitados')->name('clientes.habilitados');
+Route::get('cliente-eliminados','API\ClienteController@eliminados')->name('clientes.eliminados');
+Route::post('cliente-destroy-temporal','API\ClienteController@destroyTemporal')->name('clientes.destroy-temporal');
+Route::post('cliente-restaurar','API\ClienteController@restaurar')->name('clientes.restaurar');
+Route::get('cliente-mostrar','API\ClienteController@show')->name('clientes.mostrar');
+Route::get('cliente-reporte','API\ClienteController@reporteClientes')->name('clientes.reporte-clientes');

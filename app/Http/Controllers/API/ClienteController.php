@@ -13,19 +13,109 @@ use Peru\Sunat\{HtmlParser, Ruc, RucParser};
 use App\Models\Cliente;
 use App\Models\Persona;
 use App\Models\TipoDocumento;
+use App\Models\Valoracion;
+use App\Models\User;
 
 class ClienteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
+    public function rolUsuario($usuario)
+    {
+        $user = User::with('roles')->where('id',$usuario)->first();
+        $rol = "";
+        foreach($user->roles as $role)
+        {
+            $rol = $role->directriz;
+            break;
+        }
+
+        return $rol;
+    }
+
     public function index()
     {
         //
     }
 
+
+
+    public function habilitados(Request $request)
+    {
+        $buscar = strtoupper($request->buscar);
+        $usuario = $request->usuario;
+        $role = $this->rolUsuario($usuario);
+
+        if($role=='super-usuario' || $role=='administrador')
+        {
+            $usuario='%';
+        }
+
+        return Cliente::with(['persona' => function($q){
+                        $q->select('id','nombres','apellidos','numero_documento');
+                    },'valoracion:id,nombre,icono,clase',
+                    'users.persona:id,nombres,apellidos'] )
+                    ->where(function($query) use($buscar){
+                        $query->whereHas('persona',function($query) use($buscar){
+                            $query->where(DB::Raw("concat(upper(nombres),' ',upper(apellidos))"),'like','%'.$buscar.'%')
+                                ->orWhere("numero_documento",'like','%'.$buscar.'%');
+                        });
+                    })
+                    ->whereHas('users',function($query) use($usuario){
+                        $query->where('users.id','like',$usuario);
+                    })
+                    ->paginate($request->pagina);
+    }
+
+    public function todos(Request $request) {
+        $buscar = strtoupper($request->buscar);
+        $usuario = $request->usuario;
+        $role = $this->rolUsuario($usuario);
+
+        if($role=='super-usuario' || $role=='administrador')
+        {
+            $usuario='%';
+        }
+
+        return Cliente::with(['persona:id,nombres,apellidos,numero_documento',
+                            'valoracion:id,nombre,icono,clase',
+                            'users.persona:id,nombres,apellidos'])
+                    ->where(function($query) use($buscar){
+                        $query->whereHas('persona',function($query) use($buscar){
+                            $query->where(DB::Raw("concat(upper(nombres),' ',upper(apellidos))"),'like','%'.$buscar.'%')
+                                ->orWhere("numero_documento",'like','%'.$buscar.'%');
+                        });
+                    })
+                    ->whereHas('users',function($query) use($usuario){
+                        $query->where('users.id','like',$usuario);
+                    })
+                    ->withTrashed()->paginate($request->pagina);
+    }
+
+    public function eliminados(Request $request)
+    {
+        $buscar = strtoupper($request->buscar);
+        $usuario = $request->usuario;
+        $role = $this->rolUsuario($usuario);
+
+        if($role=='super-usuario' || $role=='administrador')
+        {
+            $usuario='%';
+        }
+
+        return Cliente::with(['persona:id,nombres,apellidos,numero_documento',
+                                'valoracion:id,nombre,icono,clase',
+                                'users.persona:id,nombres,apellidos'])
+                    ->where(function($query) use($buscar){
+                        $query->whereHas('persona',function($query) use($buscar){
+                            $query->where(DB::Raw("concat(upper(nombres),' ',upper(apellidos))"),'like','%'.$buscar.'%')
+                                ->orWhere("numero_documento",'like','%'.$buscar.'%');
+                        });
+                    })
+                    ->whereHas('users',function($query) use($usuario){
+                        $query->where('users.id','like',$usuario);
+                    })
+                    ->onlyTrashed()->paginate($request->pagina);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -129,6 +219,7 @@ class ClienteController extends Controller
             'sexo' => 'required',
             'telefono' => 'required',
             'direccion' => 'required',
+            'user_id' => 'required',
         ];
 
         $mensaje = [ 'required' => '* Dato Obligatorio',
@@ -180,9 +271,31 @@ class ClienteController extends Controller
      * @param  \App\Models\Cliente  $cliente
      * @return \Illuminate\Http\Response
      */
-    public function show(Cliente $cliente)
+    public function show(Request $request)
     {
-        //
+        $cliente = Cliente::select('id','persona_id','valoracion_id')
+                    ->where('id',$request->id)
+                    ->first();
+
+        $persona = Persona::select('id','tipo_documento_id','numero_documento',
+                            'nombres','apellidos','sexo','telefono','direccion')
+                    ->where('id',$cliente->persona_id)
+                    ->first();
+
+        $cobrador = Cliente::join('cliente_user as cu','clientes.id','=','cu.cliente_id')
+                        ->join('users as u','cu.user_id','=','u.id')
+                        ->select('u.id')
+                        ->where('clientes.id',$cliente->id)
+                        ->first();
+        $valoracion = Valoracion::select('id','nombre','icono','clase')
+                        ->where('id',$cliente->valoracion_id)->first();
+
+        return response()->json([
+            'cliente' => $cliente,
+            'persona' => $persona,
+            'cobrador' => $cobrador,
+            'valoracion' => $valoracion
+        ]);
     }
 
     /**
@@ -211,6 +324,7 @@ class ClienteController extends Controller
             'sexo' => 'required',
             'telefono' => 'required',
             'direccion' => 'required',
+            'user_id' => 'required',
         ];
 
         $mensaje = [ 'required' => '* Dato Obligatorio',
@@ -238,13 +352,19 @@ class ClienteController extends Controller
         $user = Cliente::join('cliente_user as cu','clientes.id','=','cu.cliente_id')
                     ->select('cu.user_id')
                     ->where('clientes.id',$cliente->id)
-                    ->where('cu.user_id',$request->user_id)
                     ->first();
 
-        if(!$user)
+        if($user)
         {
+            if($user->user_id != $request->user_id)
+            {
+                $cliente->users()->detach($user->user_id);
+                $cliente->users()->attach($request->user_id);
+            }
+        } else {
             $cliente->users()->attach($request->user_id);
         }
+
 
         $persona['cliente_id'] = $cliente->id;
 
@@ -255,14 +375,39 @@ class ClienteController extends Controller
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Cliente  $cliente
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Cliente $cliente)
+    public function destroy($id)
     {
-        //
+        $cliente = Cliente::withTrashed()->where('id',$id)->first();
+        $persona = Persona::where('id',$user->persona_id)->first();
+        //Quitamos todos los roles
+        $cliente->users()->detach();
+        //Eliminamos el usuario
+        $cliente->forceDelete();
+        //Eliminados sus datos personales
+        $persona->delete();
+        return "Cliente eliminado Permanentemente";
+    }
+
+    public function destroyTemporal(Request $request)
+    {
+        $cliente = Cliente::withTrashed()->where('id',$request->id);
+        $cliente->delete();
+
+        return "Cliente Enviado a Papelera Satisfactoriamente";
+    }
+
+    public function restaurar(Request $request)
+    {
+        $cliente = Cliente::onlyTrashed()->where('id',$request->id);
+        $cliente->restore();
+
+        return "Cliente Restaurado Satisfactoriamente";
+    }
+
+    public function reporteClientes(Request $request)
+    {
+        $usuario = $request->usuario;
+        $clientes = Cliente::get();
+        return $clientes;
     }
 }

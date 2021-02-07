@@ -2,7 +2,7 @@
     <div class="login-box">
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <a href="/" class="h1"><b>Presti</b>Ahorros</a>
+                <a href="/" class="h3">{{ empresa }}</a>
             </div>
             <div class="card-body">
                 <p class="login-box-msg">Iniciar Sesi&oacute;n</p>
@@ -66,6 +66,7 @@
         },
         data() {
             return{
+                empresa:process.env.MIX_EMPRESA,
                 form: new form({
                     id:'',
                     name:'',

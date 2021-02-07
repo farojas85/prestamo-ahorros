@@ -1,9 +1,17 @@
 <template>
     <form id="form-cliente" @submit.prevent="guardar">
-        <div class="form-group row">
-            <label for="nombre" class="col-form-label col-md-3">Tipo Doc.</label>
+        <div class="form group row text-center" v-if="cliente.valora">
+            <div class="col-md-12">
+                <i :class="cliente.valora.icono+' '+cliente.valora.clase+' fa-2x'"></i>
+            </div>
+             <div class="col-md-12">
+                {{ cliente.valora.nombre }}
+            </div>
+        </div>
+        <div class="form-group row mt-2">
+            <label for="nombre" class="col-form-label col-form-label-sm col-md-3">Tipo Doc.</label>
             <div class="col-md-8">
-                <select class="form-control" v-model="cliente.tipo_documento_id" title="Tipo Documento"
+                <select class="form-control form-control-sm" v-model="cliente.tipo_documento_id" title="Tipo Documento"
                     :class="{ 'is-invalid': cliente.errors.has('tipo_documento_id') }"
                     id="tipo_documento_id" @change="cambiarTipo" :disabled="cliente.estadoCrud=='mostrar'">
                     <option value="">-SELECCIONAR-</option>
@@ -16,40 +24,40 @@
             </div>
         </div>
         <div class="form-group row">
-            <label for="nombre" class="col-form-label col-md-3">Numero Doc.</label>
+            <label for="nombre" class="col-form-label col-form-label-sm col-md-3">Numero Doc.</label>
             <div class="col-md-8">
                 <input type="text" v-model="cliente.numero_documento" id="numero_documento"
                     placeholder="Número Documento" title="Número Documento"
-                    class="form-control" :class="{ 'is-invalid': cliente.errors.has('numero_documento') }"
+                    class="form-control form-control-sm" :class="{ 'is-invalid': cliente.errors.has('numero_documento') }"
                     @keypress="esNumero" @change="verificarNumeroDocumento" maxlength="15"
                     :readonly="cliente.estadoCrud=='mostrar'">
                 <has-error :form="cliente" field="numero_documento"></has-error>
             </div>
         </div>
         <div class="form-group row">
-            <label for="nombres" class="col-form-label col-md-3">Nombres</label>
+            <label for="nombres" class="col-form-label col-form-label-sm col-md-3">Nombres</label>
             <div class="col-md-8">
                 <input type="text" v-model="cliente.nombres" id="nombres" placeholder="Nombres"
-                    title="Nombres" class="form-control"
+                    title="Nombres" class="form-control form-control-sm"
                     :class="{ 'is-invalid': cliente.errors.has('nombres') }"
                     :readonly="cliente.estadoCrud=='mostrar'">
                 <has-error :form="cliente" field="nombres"></has-error>
             </div>
         </div>
         <div class="form-group row">
-            <label for="apellidos" class="col-form-label col-md-3">Apellidos</label>
+            <label for="apellidos" class="col-form-label col-form-label-sm col-md-3">Apellidos</label>
             <div class="col-md-8">
                 <input type="text" v-model="cliente.apellidos" id="apellidos" placeholder="Apellidos"
-                    title="Apellidos" class="form-control"
+                    title="Apellidos" class="form-control form-control-sm"
                     :class="{ 'is-invalid': cliente.errors.has('apellidos') }"
                     :readonly="cliente.estadoCrud=='mostrar'">
                 <has-error :form="cliente" field="apellidos"></has-error>
             </div>
         </div>
         <div class="form-group row">
-            <label for="sexo" class="col-form-label col-md-3">Sexo</label>
+            <label for="sexo" class="col-form-label col-form-label-sm col-md-3">Sexo</label>
             <div class="col-md-8">
-                <select class="form-control" v-model="cliente.sexo" title="Sexo"
+                <select class="form-control form-control-sm" v-model="cliente.sexo" title="Sexo"
                     :class="{ 'is-invalid': cliente.errors.has('sexo') }"
                     id="sexo" :disabled="cliente.estadoCrud=='mostrar'">
                     <option value="">-SELECCIONAR-</option>
@@ -60,25 +68,39 @@
             </div>
         </div>
         <div class="form-group row">
-            <label for="telefono" class="col-form-label col-md-3">Tel&eacute;fono</label>
+            <label for="telefono" class="col-form-label col-form-label-sm col-md-3">Tel&eacute;fono</label>
             <div class="col-md-8">
                 <input type="text" v-model="cliente.telefono" id="telefono" placeholder="telefono"
-                    title="Telefono" class="form-control"
+                    title="Telefono" class="form-control form-control-sm"
                     :class="{ 'is-invalid': cliente.errors.has('telefono') }"
                     :readonly="cliente.estadoCrud=='mostrar'">
                 <has-error :form="cliente" field="telefono"></has-error>
             </div>
         </div>
         <div class="form-group row">
-            <label for="direccion" class="col-form-label col-md-3">Direcci&oacute;n</label>
+            <label for="direccion" class="col-form-label col-form-label-sm col-md-3">Direcci&oacute;n</label>
             <div class="col-md-8">
                 <input type="text" v-model="cliente.direccion" id="direccion" placeholder="Dirección"
-                    title="Dirección" class="form-control"
+                    title="Dirección" class="form-control form-control-sm"
                     :class="{ 'is-invalid': cliente.errors.has('direccion') }"
                     :readonly="cliente.estadoCrud=='mostrar'">
                 <has-error :form="cliente" field="direccion"></has-error>
             </div>
         </div>
+        <div class="form-group row">
+        <label class="col-form-label col-form-label-sm col-md-3">Cobrador</label>
+            <div class="col-md-8">
+            <select class="form-control form-control-sm" v-model="cliente.user_id" title="Cobrador"
+                :class="{ 'is-invalid': cliente.errors.has('user_id') }"
+                id="user_id"  :disabled="cliente.estadoCrud=='mostrar'">
+                <option value="">-SELECCIONAR-</option>
+                <option v-for="cobrador in cobradores" :key='cobrador.id' :value="cobrador.id">
+                    {{cobrador.nombre}}
+                </option>
+            </select>
+            <has-error :form="cliente" field="user_id"></has-error>
+        </div>
+    </div>
         <div class="modal-footer ">
             <button type="button" class="btn btn-danger" data-dismiss="modal">
                 <i class="fas fa-times"></i> Cerrar
@@ -98,6 +120,7 @@
         data() {
             return {
                 tipoDocumentos:[],
+                cobradores:[],
                 config:{
                     headers:{'Authorization': 'Bearer ' + localStorage.getItem('token-api')}
                 }
@@ -105,8 +128,15 @@
         },
         created() {
             this.listarTipoDocumentos()
+            this.obtenerCobradores()
         },
         methods:{
+            obtenerCobradores() {
+                axios.get('api/cobrador-listar',this.$parent.config)
+                .then(respuesta => {
+                    this.cobradores = respuesta.data
+                })
+            },
             esNumero: function(evt) {
                 evt = (evt) ? evt : window.event;
                 var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -178,11 +208,10 @@
                 .then(respuesta => {
                     if(respuesta.data.ok == 1)
                     {
-                        swal.fire({icon:'success',text:respuesta.data.mensaje,title:'Usuarios'})
-
+                        swal.fire({icon:'success',text:respuesta.data.mensaje,title:'Clientes'})
+                        this.$parent.habilitados()
+                        $('#modal-cliente').modal('hide')
                     }
-                    // this.$parent.habilitados()
-                    // this.$Progress.finish()
                 })
                 .catch(error => {
                     if(error.response.status == 422)
@@ -195,23 +224,24 @@
             },
             actualizar()
             {
-                this.$Progress.start()
-                // this.cliente.put('api/user/'+this.form.id,this.config)
-                // .then(respuesta => {
-                //     $('#modal-usuario').modal('hide')
-                //     swal.fire({icon:'success',text:respuesta.data,title:'Usuarios'})
-                //     this.$parent.habilitados()
-                //     this.$Progress.finish()
-                // })
-                // .catch(error => {
-                //     this.$Progress.fail()
-                //     if(error.response.status == 422)
-                //     {
-                //         console.clear()
-                //     } else {
-                //         swal.fire('Error', `Ocurrió un Error: ${error.response.status}`,'error')
-                //     }
-                // })
+                this.cliente.put('api/clientes/'+this.cliente.id,this.$parent.config)
+                .then(respuesta => {
+                    if(respuesta.data.ok==1)
+                    {
+                        swal.fire({icon:'success',text:respuesta.data.mensaje,title:'Clientes'})
+                        this.$parent.habilitados()
+                        $('#modal-cliente').modal('hide')
+                    }
+                })
+                .catch(error => {
+                    this.$Progress.fail()
+                    if(error.response.status == 422)
+                    {
+                        console.clear()
+                    } else {
+                        swal.fire('Error', `Ocurrió un Error: ${error.response.status}`,'error')
+                    }
+                })
             }
         }
     }

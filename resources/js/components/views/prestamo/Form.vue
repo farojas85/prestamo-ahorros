@@ -343,7 +343,7 @@
                 .then(respuesta => {
                     if(respuesta.data.ok == 1)
                     {
-                        swal.fire({icon:'success',text:respuesta.data.mensaje,title:'Usuarios'})
+                        swal.fire({icon:'success',text:respuesta.data.mensaje,title:'Clientes'})
                         this.cliente_seleccionado = respuesta.data.cliente
                         this.form.cliente_id = this.cliente_seleccionado.cliente_id
                         $('#modal-cliente-prestamo').modal('hide')
@@ -380,7 +380,10 @@
             },
             guardar() {
 
-            }
+            },
+            mal() {
+
+            },
         }
     }
 </script>
