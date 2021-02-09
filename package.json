@@ -30,7 +30,9 @@
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.15.1",
         "admin-lte": "^3.0.5",
+        "jspdf": "^2.3.0",
         "laravel-vue-pagination": "^2.3.1",
+        "moment-timezone": "^0.5.33",
         "startbootstrap-landing-page": "^5.0.8",
         "sweetalert2": "^10.9.0",
         "vee-validate": "^3.4.3",

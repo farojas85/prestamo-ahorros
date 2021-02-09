@@ -65,6 +65,7 @@ Route::get('tipo-cuota-habilitados','API\TipoCuotaController@habilitados')->name
 Route::get('tipo-cuota-eliminados','API\TipoCuotaController@eliminados')->name('tipo-cuotas.eliminados');
 Route::post('tipo-cuota-destroy-temporal','API\TipoCuotaController@destroyTemporal')->name('tipo-cuotas.destroy-temporal');
 Route::post('tipo-cuota-restaurar','API\TipoCuotaController@restaurar')->name('tipo-cuotas.restaurar');
+Route::get('tipo-cuota-listar','API\TipoCuotaController@listar')->name('tipo-cuotas.listar');
 
 //RUTAS VALORACIONES
 Route::get('valoracion-todos','API\ValoracionController@todos')->name('valoraciones.todos');
@@ -77,8 +78,15 @@ Route::post('valoracion-restaurar','API\ValoracionController@restaurar')->name('
 Route::get('tasa-interes-todos','API\TasaInteresController@todos')->name('tasa-intereses.todos');
 Route::get('tasa-interes-habilitados','API\TasaInteresController@habilitados')->name('tasa-intereses.habilitados');
 Route::get('tasa-interes-eliminados','API\TasaInteresController@eliminados')->name('tasa-intereses.eliminados');
+Route::get('tasa-interes-listar','API\TasaInteresController@listar')->name('tasa-intereses.listar');
 // Route::post('valoracion-destroy-temporal','API\ValoracionController@destroyTemporal')->name('valoraciones.destroy-temporal');
 // Route::post('valoracion-restaurar','API\ValoracionController@restaurar')->name('valoraciones.restaurar');
+
+//FORMA PAGOS
+Route::get('forma-pago-todos','API\FormaPagoController@todos')->name('forma-pagos.todos');
+Route::get('forma-pago-habilitados','API\FormaPagoController@habilitados')->name('forma-pagos.habilitados');
+Route::get('forma-pago-eliminados','API\FormaPagoController@eliminados')->name('forma-pagos.eliminados');
+Route::get('forma-pago-listar','API\FormaPagoController@listar')->name('forma-pagos.listar');
 
 //MONEDAS
 Route::get('moneda-todos','API\MonedaController@todos')->name('monedas.todos');
@@ -86,6 +94,7 @@ Route::get('moneda-habilitados','API\MonedaController@habilitados')->name('moner
 Route::get('moneda-eliminados','API\MonedaController@eliminados')->name('monedas.eliminados');
 Route::post('moneda-destroy-temporal','API\MonedaController@destroyTemporal')->name('monedas.destroy-temporal');
 Route::post('moneda-restaurar','API\MonedaController@restaurar')->name('monedas.restaurar');
+Route::get('moneda-listar','API\MonedaController@listar')->name('monedas.listas');
 
 //MEDIO PAGOS
 Route::get('medio-pago-todos','API\MedioPagoController@todos')->name('medio-pagos.todos');

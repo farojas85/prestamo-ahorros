@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 //Route::group(['prefix' => 'auth'], function () {
     Route::post('login-user', 'API\LoginController@login');
     Route::post('registro', 'API\LoginController@registro');
+    Route::get('prestamo-imprimir-pdf','API\PrestamoController@imprimirDocumento')->name('prestamos.imprimir-pdf');
 //});
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
@@ -41,6 +42,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     Route::apiResource('estado-operaciones','API\EstadoOperacionController');
     Route::apiResource('prestamos','API\PrestamoController');
     Route::apiResource('clientes','API\ClienteController');
+    Route::apiResource('forma-pagos','API\FormaPagoController');
 
     //RUTAS ADMIN
     require __DIR__.'/rutasAdmin.php';

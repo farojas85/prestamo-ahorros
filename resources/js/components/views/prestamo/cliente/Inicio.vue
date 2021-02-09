@@ -41,7 +41,7 @@
                             &nbsp;
                             <input type="text" name="table-search" id="table-search"
                                 class="form-control"  placeholder="Buscar..." v-model="buscar"
-                                @keyup="buscarCliente">
+                                @keyup.enter="buscarCliente">
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-info">
                                     <i class="fas fa-search"></i>
@@ -218,9 +218,11 @@ export default {
             this.listar()
             this.getResults()
         },
-        buscarCliente()
+        buscarCliente(event)
         {
-
+            this.buscar =  event.target.value
+            this.listar()
+            this.getResults()
         },
         mostrar(id) {
             axios.get('api/cliente-mostrar?id='+id,this.config)
@@ -254,6 +256,7 @@ export default {
             this.cliente.clear()
             this.cliente.reset()
         },
+
         nuevo() {
             this.limpiar()
             this.cliente.estadoCrud='crear'

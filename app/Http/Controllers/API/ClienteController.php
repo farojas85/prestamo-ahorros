@@ -172,13 +172,18 @@ class ClienteController extends Controller
                 $persona_buscar['cliente_id'] = $cliente_buscar->id;
 
                 $user_buscar = Cliente::join('cliente_user as cu','clientes.id','=','cu.cliente_id')
-                        ->select('cu.user_id')
-                        ->where('clientes.id',$cliente_buscar->id)
-                        ->first();
+                                ->join('users as u','cu.user_id','=','u.id')
+                                ->join('personas as p','u.persona_id','=','p.id')
+                                ->select('cu.user_id',
+                                        DB::Raw("concat(upper(p.nombres),' ',upper(p.apellidos)) as cobrador"))
+                                ->where('clientes.id',$cliente_buscar->id)
+                                ->first()
+                ;
 
                 if($user_buscar)
                 {
                     $persona_buscar['user_id'] = $user_buscar->user_id;
+                    $persona_buscar['cobrador'] = $user_buscar->cobrador;
                 }
             }
         }
@@ -245,10 +250,13 @@ class ClienteController extends Controller
         ]);
 
         $user = Cliente::join('cliente_user as cu','clientes.id','=','cu.cliente_id')
-                ->select('cu.user_id')
-                ->where('clientes.id',$cliente->id)
-                ->where('cu.user_id',$request->user_id)
-                ->first();
+                    ->join('users as u','cu.user_id','=','u.id')
+                    ->join('personas as p','u.persona_id','=','p.id')
+                    ->select('cu.user_id',
+                        DB::Raw("concat(upper(p.nombres),' ',upper(p.apellidos)) as cobrador")
+                    )
+                    ->where('clientes.id',$cliente->id)
+                    ->first();
 
         if(!$user)
         {
@@ -257,6 +265,7 @@ class ClienteController extends Controller
 
 
         $persona['cliente_id'] =$cliente->id;
+        $persona['cobrador'] = ($user) ? $user->cobrador :'';
 
         return response()->json([
             'ok' => 1,
@@ -287,6 +296,7 @@ class ClienteController extends Controller
                         ->select('u.id')
                         ->where('clientes.id',$cliente->id)
                         ->first();
+
         $valoracion = Valoracion::select('id','nombre','icono','clase')
                         ->where('id',$cliente->valoracion_id)->first();
 
@@ -350,7 +360,11 @@ class ClienteController extends Controller
         $persona->save();
 
         $user = Cliente::join('cliente_user as cu','clientes.id','=','cu.cliente_id')
-                    ->select('cu.user_id')
+                    ->join('users as u','cu.user_id','=','u.id')
+                    ->join('personas as p','u.persona_id','=','p.id')
+                    ->select('cu.user_id',
+                        DB::Raw("concat(upper(p.nombres),' ',upper(p.apellidos)) as cobrador")
+                    )
                     ->where('clientes.id',$cliente->id)
                     ->first();
 
@@ -367,6 +381,7 @@ class ClienteController extends Controller
 
 
         $persona['cliente_id'] = $cliente->id;
+        $persona['cobrador'] = ($user) ? $user->cobrador:'';
 
         return response()->json([
             'ok' => 1,

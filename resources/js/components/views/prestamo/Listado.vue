@@ -1,14 +1,16 @@
 <template>
     <div class="row">
-        <div class="col-md-12" v-if="form.estadoCrud == '' || form.estadoCrud == null">
+        <div class="col-md-12">
+            <button type="button" class="btn bg-maroon btn-sm" @click="nuevo"
+                    v-if="$auth.can('prestamos.crear')">
+                <i class="fas fa-plus"></i> Nuevo Pr&eacute;stamo
+            </button>
+        </div>
+        <div class="col-md-12 mt-2" v-if="form.estadoCrud == '' || form.estadoCrud == null">
             <div class="card card-outline card-info">
                 <div class="card-header ">
                     <h3 class="card-title">
                         Listado de P&eacute;stamos&nbsp;
-                        <button type="button" class="btn bg-maroon btn-sm" @click="nuevo"
-                                v-if="$auth.can('prestamos.crear')">
-                            <i class="fas fa-plus"></i> Nuevo Pr&eacute;stamo
-                        </button>
                     </h3>
                 </div>
                 <div class="card-body">
@@ -50,13 +52,13 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-12" v-else-if="form.estadoCrud == 'crear' || form.estadoCrud == 'editar'">
+        <div class="col-md-12 mt-2" v-else-if="form.estadoCrud == 'crear' || form.estadoCrud == 'editar'">
             <prestamo-form :form="form"></prestamo-form>
         </div>
     </div>
 </template>
 <script>
-import PrestamoForm from './Form'
+import PrestamoForm from './forms/PrestamoForm'
 export default {
     components:{
         'prestamo-form':PrestamoForm
@@ -70,8 +72,8 @@ export default {
                 id:'',
                 cliente_id:'',
                 user_id:'',
-                fecha_prestamo:'',
-                moneda_id:'',
+                fecha_prestamo: moment(new Date()).tz('America/Lima').format('YYYY-MM-DD'),
+                moneda_id:1,
                 tipo_cambio:'',
                 tasa_interes_id:'',
                 monto:'',
@@ -79,11 +81,11 @@ export default {
                 tipo_cuota_id:'',
                 numero_cuotas:'',
                 dias_morosos:'',
-                incluye_feriados:'',
-                incluye_sabdom:'',
+                forma_pago_id:1,
                 cuotas:[],
                 estado_operacion_id:'',
-                estadoCrud:''
+                estadoCrud:'',
+                usuario_id:this.$auth.user.id
             }),
             show_prestamos:'habilitados',
             busqueda:'',
@@ -130,7 +132,7 @@ export default {
             this.listar()
             this.getResults()
         },
-        buscar() {
+        buscar(event) {
             this.busqueda =  event.target.value
             this.listar()
             this.getResults()

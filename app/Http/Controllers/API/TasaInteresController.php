@@ -91,4 +91,9 @@ class TasaInteresController extends Controller
     {
         //
     }
+
+    public function listar()
+    {
+        return TasaInteres::select('id','nombre','valor')->orderBy('valor','asc')->get();
+    }
 }

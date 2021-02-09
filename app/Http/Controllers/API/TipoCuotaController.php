@@ -112,4 +112,8 @@ class TipoCuotaController extends Controller
         return "Tipo Cuota Restaurado Satisfactoriamente";
     }
 
+    public function listar()
+    {
+        return TipoCuota::select('id','nombre','dias')->get();
+    }
 }

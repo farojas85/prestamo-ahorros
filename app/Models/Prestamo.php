@@ -12,7 +12,7 @@ class Prestamo extends Model
     protected $fillable = [
         'id','cliente_id', 'user_id','moneda_id','tasa_interes_id',
         'fecha_prestamo','monto','interes','tipo_cuota_id',
-        'numero_cuotas','dias_morosos','incluye_feriados','incluye_sabdom',
+        'numero_cuotas','dias_morosos','forma_pago_id',
         'estado_operacion_id'
     ];
 
@@ -44,5 +44,10 @@ class Prestamo extends Model
     public function estado_operacion()
     {
         return $this->belongsTo(EstadoOperacion::class);
+    }
+
+    public function forma_pago()
+    {
+        return $this->belongsTo(FormaPago::class);
     }
 }

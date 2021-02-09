@@ -9,6 +9,7 @@ try {
     //require('admin-lte/plugins/jquery-ui/jquery-ui')
     require('admin-lte/plugins/bootstrap/js/bootstrap.bundle')
     require('admin-lte/plugins/overlayScrollbars/js/jquery.overlayScrollbars')
+
 } catch (e) {}
 
 window.axios = require('axios');

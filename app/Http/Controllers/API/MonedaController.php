@@ -41,7 +41,7 @@ class MonedaController extends Controller
                     )
                     ->onlyTrashed()->paginate($request->pagina);
     }
-    
+
     public function store(Request $request)
     {
         //
@@ -90,5 +90,10 @@ class MonedaController extends Controller
     public function destroy(Moneda $moneda)
     {
         //
+    }
+
+    public function listar()
+    {
+        return Moneda::select('id','nombre','codigo','simbolo','pais')->get();
     }
 }

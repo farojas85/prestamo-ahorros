@@ -12,10 +12,14 @@ import App from './components/App.vue'
 import {store} from './store'
 import routes from './routes'
 import Auth from './auth'
+import moment from 'moment-timezone/builds/moment-timezone-with-data'
+import { jsPDF } from "jspdf";
 
 window.Vue = require('vue')
 window.swal = Swal
 window.form = Form
+window.moment = moment
+window.jsPDF = jsPDF
 
 Vue.prototype.$auth = new Auth(localStorage.getItem('user-logged'));
 

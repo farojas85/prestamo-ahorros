@@ -7,6 +7,6 @@ Route::get('prestamo-eliminados','API\PrestamoController@eliminados')->name('pre
 Route::post('prestamo-destroy-temporal','API\PrestamoController@destroyTemporal')->name('prestamos.destroy-temporal');
 Route::post('prestamo-restaurar','API\PrestamoController@restaurar')->name('prestamos.restaurar');
 Route::get('prestamo-tipo-cambio','API\PrestamoController@obtenerTipoCambio')->name('prestamos.tipo-cambio');
-
+Route::get('obtener-interes','API\PrestamoController@obtenerInteres')->name('prestamos.obtener-interes');
 //CLIENTES
 Route::post('cliente-verificar-documento','API\ClienteController@verificarNumeroDocumento')->name('clientes.verificar-documento');
