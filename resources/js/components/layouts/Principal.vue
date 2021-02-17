@@ -15,6 +15,7 @@
     import ContentHeader from './ContentHeader'
     import Footer from './Footer'
     import RightBar from './RightBar'
+
     export default {
         components: {NavBar,SideBar,ContentHeader,Footer,RightBar},
         data() {

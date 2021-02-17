@@ -1,15 +1,74 @@
 <?php
 namespace App\Http\Traits;
 
+use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Codedge\Fpdf\Fpdf\Fpdf;
 
 use App\Models\Cuota;
+use App\Models\Prestamo;
 use App\Models\TipoCuota;
 use App\Models\TasaInteres;
-use Codedge\Fpdf\Fpdf\Fpdf;
 
 trait PrestamoTrait
 {
+    public function obtenerAdminHabilitados(Request $request)
+    {
+        return Prestamo::with([
+            'cliente' => function($query){
+                $query->select('id','persona_id','valoracion_id');
+            },
+            'cliente.persona' => function($query){
+                $query->select('id','nombres','apellidos');
+            },
+            'cliente.valoracion' => function( $query) {
+                $query->select('id','nombre','icono','clase');
+            },
+            'user' => function($query){
+                $query->select('id','persona_id');
+            },
+            'user.persona' => function($query){
+                $query->select('id','nombres','apellidos');
+            },
+            'estado_operacion' => function($query){
+                $query->select('id','nombre','clase');
+            }
+        ])
+        ->select(
+            'id','fecha_prestamo','deleted_at','cliente_id','user_id',
+            'monto','interes','estado_operacion_id')
+        ->paginate($request->pagina);
+    }
+
+    public function obtenerUserHabilitados(Request $request)
+    {
+        return Prestamo::with([
+            'cliente' => function($query){
+                $query->select('id','persona_id','valoracion_id');
+            },
+            'cliente.persona' => function($query){
+                $query->select('id','nombres','apellidos');
+            },
+            'cliente.valoracion' => function( $query) {
+                $query->select('id','nombre','icono','clase');
+            },
+            'user' => function($query){
+                $query->select('id','persona_id');
+            },
+            'user.persona' => function($query){
+                $query->select('id','nombres','apellidos');
+            },
+            'estado_operacion' => function($query){
+                $query->select('id','nombre','clase');
+            }
+        ])
+        ->select(
+            'id','fecha_prestamo','deleted_at','cliente_id','user_id',
+            'monto','interes','estado_operacion_id')
+        ->where('prestamos.user_id',$request->usuario)
+        ->paginate($request->pagina);
+    }
+
     public function calcularInteres($request)
     {
         $tasaInteres = TasaInteres::select('valor')->where('id',$request->tasa)->first();
@@ -58,7 +117,7 @@ trait PrestamoTrait
             $cuota->monto_cuota = $cuota_monto;
             $cuota->saldo = $monto_inicial - $cuota_monto;
             $cuota->fecha_vencimiento = $fechaSiguiente->format('Y-m-d');
-            $cuota->estado_operacion_id = 1;
+            $cuota->estado_operacion_id = 2;
             $cuota->save();
 
             $monto_inicial -= $cuota_monto;
@@ -180,18 +239,55 @@ trait PrestamoTrait
         $pdf->Cell(190,7,utf8_decode('CRONOGRAMA DE CUOTAS'),0,1,'C',0);
 
         //CABECERA CUOTAS
-        $pdf->SetLineWidth(0.5);
-        $pdf->Rect(10, 89, 190, 7);
+        $pdf->SetLineWidth(0.6);
+        $pdf->Rect(45, 89, 120, 7);
         $pdf->SetLineWidth(0.1);
-
+        $pdf->SetFillColor(190,190,190);
         $pdf->SetFont('Helvetica','B',10);
-        $pdf->SetXY(10,89);
-        $pdf->Cell(15,7,'Cuota',1,1,'C',0);
-        $pdf->SetXY(25,89);
-        $pdf->Cell(25,7,'Fecha Venc.',1,1,'C',0);
-        $pdf->SetXY(50,89);
-        $pdf->Cell(25,7,'Monto Cuota',1,1,'C',0);
 
+        $pdf->SetXY(45,89);
+        $pdf->Cell(15,7,'Cuota',1,1,'C',1);
+        $pdf->SetXY(60,89);
+        $pdf->Cell(25,7,'Fecha Venc.',1,1,'C',1);
+        $pdf->SetXY(85,89);
+        $pdf->Cell(25,7,'Monto Cuota',1,1,'C',1);
+        $pdf->SetXY(110,89);
+        $pdf->Cell(25,7,'Saldo',1,1,'C',1);
+        $pdf->SetXY(135,89);
+        $pdf->Cell(30,7,'Estado',1,1,'C',1);
+
+
+        $pdf->SetFillColor(255,255,255);
+
+        $pdf->SetFont('Helvetica','',10);
+
+        $posY=96;
+
+        foreach($prestamo->cuotas as $cuota)
+        {
+            //NÚMERO CUOTA
+            $pdf->SetXY(45,$posY);
+            $pdf->Cell(15,7,$cuota->numero_cuota,1,1,'C',0);
+            //FECHA VENCIMIENTO
+            $pdf->SetXY(60,$posY);
+            $fecha_venc = Carbon::parse($cuota->fecha_vencimiento)->format('d/m/Y');
+            $pdf->Cell(25,7,$fecha_venc,1,1,'C',0);
+            //MONTO CUOTAs
+            $pdf->SetXY(85,$posY);
+            $pdf->Cell(25,7,number_format($cuota->monto_cuota,2),1,1,'C',0);
+            //SALDO
+            $pdf->SetXY(110,$posY);
+            $pdf->Cell(25,7,number_format($cuota->saldo,2),1,1,'C',0);
+            //ESTADO
+            if($cuota->estado_operacion->nombre=='Pendiente')
+            {
+                $pdf->SetTextColor(255,0,0);
+            }
+            $pdf->SetXY(135,$posY);
+            $pdf->Cell(30,7,$cuota->estado_operacion->nombre,1,1,'C',0);
+            $posY +=7;
+            $pdf->SetTextColor(0,0,0);
+        }
         $pdf->output();
         exit;
     }

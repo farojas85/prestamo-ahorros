@@ -14,6 +14,11 @@ class EstadoOperacion extends Model
 
     public function prestamos()
     {
-        return $this->hasMany(Prestamo::Class);
+        return $this->hasMany(Prestamo::class);
+    }
+
+    public function cuotas()
+    {
+        return $this->hasMany(EstadoOperacion::class);
     }
 }

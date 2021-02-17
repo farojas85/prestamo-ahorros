@@ -14,6 +14,11 @@ class Persona extends Model
         'apellidos', 'sexo', 'telefono', 'direccion'
     ];
 
+    public function getNombreyApellidosAttribute()
+    {
+        return $this->attributes["nombres"] ." ". $this->attributes["apellidos"];
+    }
+
     public function TipoDocumento()
     {
         return $this->belongsTo(TipoDocumento::class);

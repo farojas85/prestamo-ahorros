@@ -50,4 +50,9 @@ class Prestamo extends Model
     {
         return $this->belongsTo(FormaPago::class);
     }
+
+    public function cuotas()
+    {
+        return $this->hasMany(Cuota::class);
+    }
 }

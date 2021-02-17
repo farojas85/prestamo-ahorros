@@ -49,19 +49,109 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row mt-2">
+                        <div class="col-md-12" id="detalle-tabla">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped table-bordered table-hover text-nowrap">
+                                    <thead class="bg-navy">
+                                        <tr>
+                                            <th></th>
+                                            <th class="text-center">#</th>
+                                            <th>Fecha</th>
+                                            <th>Cliente</th>
+                                            <th v-if="$auth.hasRole('administrador') || $auth.hasRole('super-usuario')">Cobrador</th>
+                                            <th>Monto</th>
+                                            <th>Interes</th>
+                                            <th>Monto Final</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-if="total == 0">
+                                            <td class="text-danger text-center" colspan="9">
+                                                -- DATOS NO REGISTRADOS - TABLA VACÍA --
+                                            </td>
+                                        </tr>
+                                        <tr v-else-if="total>0" v-for="(prestamo,fila) in prestamos.data" :key="prestamo.id">
+                                            <td>
+                                                <span v-if="prestamo.deleted_at == null">
+                                                    <button type="button" class="btn bg-pink btn-xs"
+                                                            @click="mostrarCuotas(prestamo.id)" title="Mostrar Cuotas del Préstamo"
+                                                            v-if="$auth.can('prestamos.mostrar-cuotas')">
+                                                        <i class="fas fa-closed-captioning"></i>
+                                                    </button>
+                                                    <button type="button" class="btn bg-info btn-xs"
+                                                            @click="mostrarCuotas(prestamo.id)" title="Mostrar Préstamo"
+                                                            v-if="$auth.can('prestamos.mostrar')">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-warning btn-xs"
+                                                            @click="editar(prestamo.id)" title="Editar Préstamo"
+                                                            v-if="$auth.can('prestamos.editar')">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger btn-xs"
+                                                            @click="eliminar(prestamo.id)" title="Eliminar Préstamo"
+                                                            v-if="$auth.can('prestamos.eliminar')">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </span>
+                                                <span v-else>
+                                                    <button type="button" class="btn bg-purple btn-xs"
+                                                            @click="restaurar(prestamo.id)" title="Restaurar Préstamo"
+                                                            v-if="$auth.can('prestamos.restaurar')">
+                                                        <i class="fas fa-trash-restore"></i>
+                                                    </button>
+                                                </span>
+                                            </td>
+                                            <td v-text="fila+prestamos.from"></td>
+                                            <td>{{ prestamo.fecha_prestamo | miFecha }}</td>
+                                            <td>{{ prestamo.cliente.persona.nombres }} {{ prestamo.cliente.persona.apellidos }}</td>
+                                            <td v-if="$auth.hasRole('administrador') || $auth.hasRole('super-usuario')">
+                                                {{ prestamo.user.persona.nombres }} {{ prestamo.user.persona.apellidos }}
+                                            </td>
+                                            <td>{{ prestamo.monto }}</td>
+                                            <td>{{ prestamo.interes }}</td>
+                                            <td>{{ (parseFloat(prestamo.monto) + parseFloat(prestamo.interes)).toFixed(2) }}</td>
+                                            <td>
+                                                <span :class="prestamo.estado_operacion.clase">{{ prestamo.estado_operacion.nombre }}</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-12 mt-2" v-else-if="form.estadoCrud == 'crear' || form.estadoCrud == 'editar'">
             <prestamo-form :form="form"></prestamo-form>
         </div>
+        <div class="modal fade" id="modal-cuota">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="modal-cuota-title">Large Modal</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modal-cuota-body">
+                        <cuota-form :cuota="cuota" v-if="cuota.prestamo_id"></cuota-form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
 import PrestamoForm from './forms/PrestamoForm'
+import CuotaForm from './forms/CuotaForm'
 export default {
     components:{
-        'prestamo-form':PrestamoForm
+        'prestamo-form':PrestamoForm,
+        'cuota-form':CuotaForm
     },
     data() {
         return {
@@ -87,6 +177,25 @@ export default {
                 estadoCrud:'',
                 usuario_id:this.$auth.user.id
             }),
+            cuota: new form({
+                prestamo_id:'',
+                cliente:'',
+                cobrador:'',
+                fecha:'',
+                tipo_cambio:'',
+                moneda:'',
+                monto:'',
+                tasa_interes:'',
+                interes:'',
+                tipo_cuota:'',
+                numero_cuotas:'',
+                total:'',
+                saldo:'',
+                estado:'',
+                estado_clase:'',
+                pago:'',
+                cuotas:[]
+            }),
             show_prestamos:'habilitados',
             busqueda:'',
             config:{
@@ -99,14 +208,16 @@ export default {
     },
     methods:{
         listar() {
-            axios.get('/api/prestamo-'+this.show_prestamos+'?pagina='+this.pagina+'&buscar='+this.busqueda,this.config)
+            axios.get('/api/prestamo-'+this.show_prestamos+'?pagina='+this.pagina
+                                    +'&buscar='+this.busqueda+'&usuario='+this.$auth.user.id,this.config)
             .then((respuesta) => {
                 this.prestamos=respuesta.data
                 this.total = this.prestamos.total
             })
         },
         getResults(page=1) {
-            axios.get('/api/prestamo-'+this.show_prestamos+'?page='+page+'&pagina='+this.pagina+'&buscar='+this.busqueda,this.config)
+            axios.get('/api/prestamo-'+this.show_prestamos+'?page='+page+'&pagina='+this.pagina
+                                    +'&buscar='+this.busqueda+'&usuario='+this.$auth.user.id,this.config)
             .then(response => {
                 this.prestamos = response.data
                 this.total = this.prestamos.total
@@ -162,7 +273,44 @@ export default {
         },
         restaurar(id) {
 
-        }
+        },
+        obtenerCuotas(id)
+        {
+            axios.get('api/prestamo-cuotas?id='+id,this.config)
+            .then(respuesta => {
+                var prestamo = respuesta.data.prestamo
+                var cliente = respuesta.data.cliente
+                var cobrador = respuesta.data.cobrador
+                var cuotas = respuesta.data.cuotas
+                if(respuesta.data)
+                {
+                    this.cuota.prestamo_id = id
+                    this.cuota.cliente = cliente
+                    this.cuota.cobrador = cobrador
+                    this.cuota.fecha = prestamo.fecha
+                    this.cuota.tipo_cambio = prestamo.tipo_cambio
+                    this.cuota.moneda = prestamo.moneda
+                    this.cuota.monto = prestamo.monto
+                    this.cuota.tasa_interes = prestamo.tasa_interes
+                    this.cuota.interes = prestamo.interes
+                    this.cuota.tipo_cuota = prestamo.tipo_cuota
+                    this.cuota.numero_cuotas = prestamo.numero_cuotas
+                    this.cuota.total = prestamo.total
+                    this.cuota.saldo = prestamo.saldo
+                    this.cuota.estado = prestamo.estado
+                    this.cuota.estado_clase = prestamo.estado_clase
+                    this.cuota.pago = prestamo.pago
+                    this.cuota.cuotas = cuotas
+                }
+            })
+        },
+        mostrarCuotas(id) {
+            this.cuota.clear()
+            this.cuota.reset()
+            this.obtenerCuotas(id)
+            $('#modal-cuota-title').html('Cuotas Préstamo')
+            $('#modal-cuota').modal('show')
+        },
     }
 }
 </script>

@@ -10,10 +10,24 @@ use GuzzleHttp\Client;
 use TCPDF;
 
 use App\Models\Prestamo;
+use App\Models\User;
 use App\Http\Traits\PrestamoTrait;
 class PrestamoController extends Controller
 {
     use PrestamoTrait;
+
+    public function rolUsuario($usuario)
+    {
+        $user = User::with('roles')->where('id',$usuario)->first();
+        $rol = "";
+        foreach($user->roles as $role)
+        {
+            $rol = $role->directriz;
+            break;
+        }
+
+        return $rol;
+    }
 
     public function obtenerInteres(Request $request)
     {
@@ -22,8 +36,17 @@ class PrestamoController extends Controller
 
     public function habilitados(Request $request)
     {
-        $buscar = strtoupper($request->buscar);
-        return Prestamo::paginate($request->pagina);
+        //$buscar = strtoupper($request->buscar);
+
+        $role = $this->rolUsuario($request->usuario);
+
+        if($role =='super-usuario' || $role == 'administrador')
+        {
+            return $this->obtenerAdminHabilitados($request);
+        }
+
+        return $this->obtenerUserHabilitados($request);
+
     }
 
     public function todos(Request $request)
@@ -116,7 +139,10 @@ class PrestamoController extends Controller
     {
         $prestamo = Prestamo::with([
                         'moneda:id,nombre','tipo_cuota:id,nombre',
-                        'tasa_interes:id,nombre'
+                        'tasa_interes:id,nombre',
+                        'cuotas',
+                        'estado_operacion:id,nombre',
+                        'cuotas.estado_operacion:id,nombre'
                         ])
                         ->where('id',$request->d)->first();
         $this->imprimirPdf($prestamo);

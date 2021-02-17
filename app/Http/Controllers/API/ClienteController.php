@@ -393,7 +393,7 @@ class ClienteController extends Controller
     public function destroy($id)
     {
         $cliente = Cliente::withTrashed()->where('id',$id)->first();
-        $persona = Persona::where('id',$user->persona_id)->first();
+        $persona = Persona::where('id',$cliente->persona_id)->first();
         //Quitamos todos los roles
         $cliente->users()->detach();
         //Eliminamos el usuario

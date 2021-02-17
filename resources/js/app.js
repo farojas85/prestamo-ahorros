@@ -45,6 +45,7 @@ const toast = swal.mixin({
 window.toast = toast
 
 require('./componentes')
+require('./filtros')
 
 const router = new VueRouter({
     mode:'history',

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Traits;
+use Illuminate\Support\Str;
 
 trait RoleTrait
 {

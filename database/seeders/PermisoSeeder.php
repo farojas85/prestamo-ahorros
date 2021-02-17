@@ -308,6 +308,35 @@ class PermisoSeeder extends Seeder
         ])
         ;
 
+        $permiso70 = Permiso::firstOrCreate([
+            'nombre' => 'Vista Cliente','directriz' => 'clientes.inicio','descripcion' => 'Vista Inicio Cliente.'
+        ])
+        ;
+        $permiso71 = Permiso::firstOrCreate([
+            'nombre' => 'Crear Cliente','directriz' => 'clientes.crear','descripcion' => 'Añadir Nuevo Cliente.'
+        ])
+        ;
+        $permiso72 = Permiso::firstOrCreate([
+            'nombre' => 'Editar Cliente','directriz' => 'clientes.editar','descripcion' => 'Editar Datos de Cliente Seleccionado.'
+        ])
+        ;
+        $permiso73 = Permiso::firstOrCreate([
+            'nombre' => 'Eliminar Cliente','directriz' => 'clientes.eliminar','descripcion' => 'Eliminar Registro de Cliente Seleccionado.'
+        ])
+        ;
+        $permiso74 = Permiso::firstOrCreate([
+            'nombre' => 'Restaurar Cliente','directriz' => 'clientes.restaurar','descripcion' => 'Restaurar Registro de Cliente Seleccionado.'
+        ])
+        ;
+        $permiso75 = Permiso::firstOrCreate([
+            'nombre' => 'Mostrar Cliente','directriz' => 'clientes.mostrar','descripcion' => 'Restaurar Registro de Cliente Seleccionado.'
+        ])
+        ;
+        $permiso76 = Permiso::firstOrCreate([
+            'nombre' => 'Reporte Cliente','directriz' => 'clientes.reporte','descripcion' => 'Restaurar Registro de Cliente Seleccionado.'
+        ])
+        ;
+
         $role1->permisos()->sync([
             $permiso1->id, $permiso2->id,$permiso3->id,$permiso4->id,$permiso5->id,$permiso6->id,$permiso7->id,$permiso8->id,$permiso9->id,$permiso10->id,
             $permiso11->id, $permiso12->id,$permiso13->id,$permiso14->id,$permiso15->id,$permiso16->id,$permiso17->id,$permiso18->id,$permiso19->id,$permiso20->id,
@@ -315,7 +344,8 @@ class PermisoSeeder extends Seeder
             $permiso31->id, $permiso32->id,$permiso33->id,$permiso34->id,$permiso35->id,$permiso36->id,$permiso37->id,$permiso38->id,$permiso39->id,$permiso40->id,
             $permiso41->id, $permiso42->id,$permiso43->id,$permiso44->id,$permiso45->id,$permiso46->id,$permiso47->id,$permiso48->id,$permiso49->id,$permiso50->id,
             $permiso51->id, $permiso52->id,$permiso53->id,$permiso54->id,$permiso55->id,$permiso56->id,$permiso57->id,$permiso58->id,$permiso59->id,$permiso60->id,
-            $permiso61->id, $permiso62->id,$permiso63->id,$permiso64->id,$permiso65->id,$permiso66->id,$permiso67->id,$permiso68->id,$permiso69->id
+            $permiso61->id, $permiso62->id,$permiso63->id,$permiso64->id,$permiso65->id,$permiso66->id,$permiso67->id,$permiso68->id,$permiso69->id.$permiso70->id,
+            $permiso71->id, $permiso72->id,$permiso73->id,$permiso74->id,$permiso75->id,$permiso76->id,
         ]);
     }
 }

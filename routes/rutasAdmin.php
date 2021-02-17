@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Support\Facades\Route;
 //RUTAS ROLES
 Route::get('role-todos','API\RoleController@todos')->name('roles.todos');
 Route::get('role-habilitados','API\RoleController@habilitados')->name('roles.habilitados');
