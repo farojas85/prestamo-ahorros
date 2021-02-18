@@ -91,7 +91,7 @@ Route::get('forma-pago-listar','API\FormaPagoController@listar')->name('forma-pa
 
 //MONEDAS
 Route::get('moneda-todos','API\MonedaController@todos')->name('monedas.todos');
-Route::get('moneda-habilitados','API\MonedaController@habilitados')->name('moneras.habilitados');
+Route::get('moneda-habilitados','API\MonedaController@habilitados')->name('monedas.habilitados');
 Route::get('moneda-eliminados','API\MonedaController@eliminados')->name('monedas.eliminados');
 Route::post('moneda-destroy-temporal','API\MonedaController@destroyTemporal')->name('monedas.destroy-temporal');
 Route::post('moneda-restaurar','API\MonedaController@restaurar')->name('monedas.restaurar');
