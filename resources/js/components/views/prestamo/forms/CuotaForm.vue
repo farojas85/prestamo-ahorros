@@ -7,12 +7,15 @@
                 </div>
                 <div class="card-body">
                     <div class="form-group row mb-1">
+
+                    </div>
+                    <div class="form-group row mb-1">
                         <label class="col-md-2 col-form-label col-form-label-sm">Cliente</label>
                         <div class="col-md-10">
                             <input type="text" class="form-control form-control-sm" v-model="cuota.cliente" readonly>
                         </div>
                     </div>
-                     <div class="form-group row mb-1" v-if="this.$auth.hasRole('administrador') || this.$auth.hasRole('super-usuario')">
+                    <div class="form-group row mb-1" v-if="this.$auth.hasRole('administrador') || this.$auth.hasRole('super-usuario')">
                         <label class="col-md-2 col-form-label col-form-label-sm">Cobrador</label>
                         <div class="col-md-10">
                             <input type="text" class="form-control form-control-sm" v-model="cuota.cobrador" readonly>
@@ -78,11 +81,6 @@
                             <input type="text" class="form-control form-control-sm" v-model="cuota.pago" readonly="">
                         </div>
                     </div>
-                    <div class="form-group text-right">
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">
-                            <i class="fas fa-times"></i> Cerrar
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -128,6 +126,11 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group text-right">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -147,6 +150,17 @@
                 .then(response => {
                     this.cuota.cuotas = response.data.cuotas
                 });
+            },
+            diferenciaDias(fechaInicio)
+            {
+                var fecha1 = moment(fechaInicio).tz('America/Lima');
+                var fecha2 = moment(new Date()).tz('America/Lima');
+
+                if(fechaInicio == null || fechaInicio =='')
+                {
+                    return null;
+                }
+                return fecha2.diff(fecha1,'days');
             },
         }
     }

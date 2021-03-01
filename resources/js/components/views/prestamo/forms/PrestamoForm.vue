@@ -8,6 +8,10 @@
                 <span v-else-if="form.estadoCrud=='editar'">
                     Editar
                 </span> Pr&eacute;stamo
+                <button type="button" class="btn btn-success btn-sm" @click="$parent.nuevo('')"
+                        v-if="$auth.can('prestamos.crear')">
+                    <i class="fas fa-undo-alt"></i> Retornar
+                </button>
             </h3>
         </div>
         <div class="card-body">
@@ -173,17 +177,17 @@
                                 </div>
                             </div>
                             <div class="card-footer text-muted text-center">
-                                <button type="button" @click="generarPdf">
+                                <!-- <button type="button" @click="generarPdf">
                                     descargar
-                                </button>
+                                </button> -->
                                 <span v-if="form.estadoCrud!='mostrar'">
                                     <button type="submit" class="btn btn-success">
                                         <span v-if="form.estadoCrud=='crear'"><i class="fas fa-save"></i> Guardar</span>
                                         <span v-else-if="form.estadoCrud=='editar'"><i class="fas fa-sync-alt"></i> Actualizar</span>
                                     </button>
                                 </span>
-                                <button type="button" class="btn btn-danger" data-dismiss="modal">
-                                    <i class="fas fa-times"></i> Cerrar
+                                <button type="button" class="btn btn-danger" @click="cancelar">
+                                    <i class="fas fa-times"></i> Cancelar
                                 </button>
                             </div>
                         </div>
@@ -295,7 +299,7 @@
                                     </div>
                                 </div>
                                 <div class="modal-footer ">
-                                    <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                    <button type="button" class="btn btn-danger" @click="cancelar">
                                         <i class="fas fa-times"></i> Cerrar
                                     </button>
                                     <span v-if="cliente.estadoCrud!='mostrar'">
@@ -368,6 +372,11 @@
             this.listarFormaPagos()
         },
         methods:{
+            cancelar() {
+                this.form.reset()
+                this.form.clear()
+                this.form.estadoCrud =''
+            },
             obtenerTipoCambio(e) {
                 this.form.tipo_cambio =''
                 if(e.target.value != 1)

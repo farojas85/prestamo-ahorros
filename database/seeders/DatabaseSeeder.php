@@ -28,7 +28,9 @@ class DatabaseSeeder extends Seeder
             EntidadFinancieraSeeder::class,
             TipoMovimientoSeeder::class,
             EstadoOperacionSeeder::class,
-            FormaPagoSeeder::class
+            FormaPagoSeeder::class,
+            TipoComprobanteSeeder::class,
+            SerieSeeder::class
         ]);
     }
 }

@@ -2,9 +2,13 @@
 namespace App\Http\Traits;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 use Carbon\Carbon;
 use Codedge\Fpdf\Fpdf\Fpdf;
 
+use App\Models\Cliente;
+use App\Models\User;
 use App\Models\Cuota;
 use App\Models\Prestamo;
 use App\Models\TipoCuota;
@@ -14,6 +18,8 @@ trait PrestamoTrait
 {
     public function obtenerAdminHabilitados(Request $request)
     {
+        $ultimaCuotaPendiente =  Cuota::ultimaCuotaPendiente();
+
         return Prestamo::with([
             'cliente' => function($query){
                 $query->select('id','persona_id','valoracion_id');
@@ -65,7 +71,6 @@ trait PrestamoTrait
         ->select(
             'id','fecha_prestamo','deleted_at','cliente_id','user_id',
             'monto','interes','estado_operacion_id')
-        ->where('prestamos.user_id',$request->usuario)
         ->paginate($request->pagina);
     }
 
@@ -290,5 +295,60 @@ trait PrestamoTrait
         }
         $pdf->output();
         exit;
+    }
+
+    public function obtenerDatosPrestamo(int $prestamo_id)
+    {
+        $prestamo = Prestamo::with([
+                        'moneda:id,nombre,simbolo',
+                        'tasa_interes:id,nombre,valor',
+                        'tipo_cuota:id,nombre',
+                        'estado_operacion:id,nombre,clase',
+                        'forma_pago:id,nombre'])
+                    ->where('id',$prestamo_id)->first();
+
+        //$cliente = Cliente::
+        $cliente = Cliente::with(['persona:id,nombres,apellidos,numero_documento',
+                            'valoracion:id,nombre,icono,clase',
+                            'users.persona:id,nombres,apellidos'])
+                    ->select('id','persona_id','valoracion_id','deleted_at',
+                        DB::Raw("(SELECT min(fecha_vencimiento) FROM cuotas cu
+                                INNER JOIN prestamos pe on pe.id = cu.prestamo_id
+                                WHERE pe.cliente_id = clientes.id
+                                    and cu.estado_operacion_id = 2) as fecha_cuota"))
+                    ->where('id',$prestamo->cliente_id)
+                    ->first();
+
+        $presta = new Prestamo();
+        $presta->id = $prestamo->id;
+        $presta->tipo_cambio = $prestamo->tipo_cambio;
+        $presta->fecha = Carbon::parse($prestamo->fecha_prestamo)->format('Y-m-d');
+        $presta->monto = number_format($prestamo->monto,2);
+        $presta->moneda = $prestamo->moneda->nombre;
+        $presta->tasa_interes = $prestamo->tasa_interes->nombre;
+        $presta->interes = number_format($prestamo->interes,2);
+        $presta->tipo_cuota= $prestamo->tipo_cuota->nombre;
+        $presta->numero_cuotas = $prestamo->numero_cuotas;
+        $presta->estado = $prestamo->estado_operacion->nombre;
+        $presta->estado_clase = $prestamo->estado_operacion->clase;
+        $presta->pago = $prestamo->forma_pago->nombre;
+        $presta->total = number_format($prestamo->monto + $prestamo->interes,2);
+
+        $saldo = Cuota::where('prestamo_id',$prestamo_id)
+                    ->where('estado_operacion_id',2)->sum('monto_cuota');
+
+        $presta->saldo = number_format($saldo,2);
+
+        $cuotas = Cuota::with('estado_operacion:id,nombre,clase')
+                    ->where('prestamo_id',$prestamo_id)->paginate(6);
+
+        return response()->json([
+            'cliente' => ucwords(strtolower($cliente->persona->nombres." ".$prestamo->cliente->persona->apellidos)),
+            'cobrador' => ucwords(strtolower($cliente->users->persona->nombres." ".$prestamo->user->persona->apellidos)),
+            'prestamo' => $presta,
+            'cuotas' => $cuotas
+        ]);
+
+
     }
 }

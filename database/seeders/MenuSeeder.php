@@ -36,6 +36,11 @@ class MenuSeeder extends Seeder
         ])
         ;
 
-        $role1->menus()->sync([$menu1->id,$menu2->id,$menu3->id,$menu4->id]);
+        $menu5 = Menu::firstOrCreate(['nombre' => 'Cobranza','enlace' => 'cobranza',
+                                    'icono' => 'fas fa-shopping-bag', 'padre_id' => null,'orden' => 0
+        ])
+        ;
+
+        $role1->menus()->sync([$menu1->id,$menu2->id,$menu3->id,$menu4->id,$menu5->id]);
     }
 }

@@ -1,13 +1,49 @@
 <template>
     <form id="form-cliente" @submit.prevent="guardar">
-        <div class="form group row text-center" v-if="cliente.valora">
+        <div class="form-group row text-center">
+            <div class="col-md-12">
+                <span v-if="!cliente.fecha_cuota" class="text-purple">
+                    <i class="fas fa-smile fa-2x"></i>
+                </span>
+                <span v-else-if="diferenciaDias(cliente.fecha_cuota) == 0" class="text-green">
+                    <i class="fas fa-grin-stars fa-2x"></i>
+                </span>
+                <span v-else-if="diferenciaDias(cliente.fecha_cuota) >=1 && diferenciaDias(cliente.fecha_cuota) <=2" class="text-blue">
+                    <i class="fas fa-smile-beam fa-2x"></i>
+                </span>
+                <span v-else-if="diferenciaDias(cliente.fecha_cuota) >=3 && diferenciaDias(cliente.fecha_cuota) <=5" class="text-purple">
+                    <i class="fas fa-smile fa-2x"></i>
+                </span>
+                <span v-else-if="diferenciaDias(cliente.fecha_cuota) >5" class="text-danger">
+                    <i class="fas fa-sad-tear fa-2x"></i>
+                </span>
+            </div>
+            <div class="col-md-12">
+                <span v-if="!cliente.fecha_cuota" class="text-purple">
+                    Regular
+                </span>
+                <span v-else-if="diferenciaDias(cliente.fecha_cuota) == 0" class="text-green">
+                  Puntual
+                </span>
+                <span v-else-if="diferenciaDias(cliente.fecha_cuota) >=1 && diferenciaDias(cliente.fecha_cuota) <=2" class="text-blue">
+                    Bueno
+                </span>
+                <span v-else-if="diferenciaDias(cliente.fecha_cuota) >=3 && diferenciaDias(cliente.fecha_cuota) <=5" class="text-purple">
+                    Regular
+                </span>
+                <span v-else-if="diferenciaDias(cliente.fecha_cuota) >5" class="text-danger">
+                    Moroso
+                </span>
+            </div>
+        </div>
+        <!-- <div class="form group row text-center" v-if="cliente.valora">
             <div class="col-md-12">
                 <i :class="cliente.valora.icono+' '+cliente.valora.clase+' fa-2x'"></i>
             </div>
              <div class="col-md-12">
                 {{ cliente.valora.nombre }}
             </div>
-        </div>
+        </div> -->
         <div class="form-group row mt-2">
             <label for="nombre" class="col-form-label col-form-label-sm col-md-3">Tipo Doc.</label>
             <div class="col-md-8">
@@ -131,6 +167,17 @@
             this.obtenerCobradores()
         },
         methods:{
+            diferenciaDias(fechaInicio)
+            {
+                var fecha1 = moment(fechaInicio).tz('America/Lima');
+                var fecha2 = moment(new Date()).tz('America/Lima');
+
+                if(fechaInicio == null || fechaInicio =='')
+                {
+                    return null;
+                }
+                return fecha2.diff(fecha1,'days');
+            },
             obtenerCobradores() {
                 axios.get('api/cobrador-listar',this.$parent.config)
                 .then(respuesta => {

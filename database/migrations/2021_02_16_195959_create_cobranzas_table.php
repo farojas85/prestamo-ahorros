@@ -21,9 +21,13 @@ class CreateCobranzasTable extends Migration
             $table->foreignId('entidad_financiera_id')->constrained('entidad_financieras');
             $table->foreignId('medio_pago_id')->constrained('medio_pagos');
             $table->date('fecha_deposito')->nullable();
-            $table->string('numero_operacion',100)->nullable();
+            $table->foreignId('serie_id')->nullable()->constrained('series');
+            $table->unsignedBigInteger('numero')->nullable();
+            $table->string('numero_operacion')->nullable();
             $table->decimal('total',18,2);
+            $table->foreignId('estado_operacion_id')->constrained('estado_operacions');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

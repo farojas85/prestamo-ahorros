@@ -1,16 +1,14 @@
 <template>
     <div class="row">
-        <div class="col-md-12">
-            <button type="button" class="btn bg-maroon btn-sm" @click="nuevo"
-                    v-if="$auth.can('prestamos.crear')">
-                <i class="fas fa-plus"></i> Nuevo Pr&eacute;stamo
-            </button>
-        </div>
-        <div class="col-md-12 mt-2" v-if="form.estadoCrud == '' || form.estadoCrud == null">
+        <div class="col-md-12 mb-1" v-if="(form.estadoCrud == '' || form.estadoCrud == null) && cobranza.estadoCrud == ''" >
             <div class="card card-outline card-info">
                 <div class="card-header ">
                     <h3 class="card-title">
                         Listado de P&eacute;stamos&nbsp;
+                        <button type="button" class="btn bg-maroon btn-sm" @click="nuevo('crear')"
+                                v-if="$auth.can('prestamos.crear')">
+                            <i class="fas fa-plus"></i> Nuevo Pr&eacute;stamo
+                        </button>
                     </h3>
                 </div>
                 <div class="card-body">
@@ -80,10 +78,10 @@
                                                             v-if="$auth.can('prestamos.mostrar-cuotas')">
                                                         <i class="fas fa-closed-captioning"></i>
                                                     </button>
-                                                    <button type="button" class="btn bg-info btn-xs"
-                                                            @click="mostrarCuotas(prestamo.id)" title="Mostrar Préstamo"
-                                                            v-if="$auth.can('prestamos.mostrar')">
-                                                        <i class="fa fa-eye"></i>
+                                                    <button type="button" class="btn bg-olive btn-xs"
+                                                            @click="nuevaCobranza('crear',prestamo.id)" title="Cobrar Cuota"
+                                                            v-if="$auth.can('cobranzas.crear')">
+                                                        <i class="fas fa-shopping-basket"></i>
                                                     </button>
                                                     <button type="button" class="btn btn-warning btn-xs"
                                                             @click="editar(prestamo.id)" title="Editar Préstamo"
@@ -125,8 +123,23 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-12 mt-2" v-else-if="form.estadoCrud == 'crear' || form.estadoCrud == 'editar'">
+        <div class="col-md-12 mb-1" v-else-if="form.estadoCrud == 'crear' || form.estadoCrud == 'editar'">
             <prestamo-form :form="form"></prestamo-form>
+        </div>
+        <div class="col-md-12 mb-1" v-if="cobranza.estadoCrud=='crear'">
+            <div class="card card-outline card-info">
+                <div class="card-header ">
+                    <h3 class="card-title">
+                        Nueva Cobranza&nbsp;
+                        <button type="button" class="btn bg-green btn-sm" @click="nuevaCobranza('','')"
+                                v-if="$auth.can('cobranzas.crear')">
+                            <i class="fas fa-undo-alt"></i> retornar
+                        </button>
+                    </h3>
+                </div>
+                <div class="card-body">
+                </div>
+            </div>
         </div>
         <div class="modal fade" id="modal-cuota">
             <div class="modal-dialog modal-xl">
@@ -148,10 +161,11 @@
 <script>
 import PrestamoForm from './forms/PrestamoForm'
 import CuotaForm from './forms/CuotaForm'
+import CobranzaForm from './forms/CobranzaForm'
+
 export default {
     components:{
-        'prestamo-form':PrestamoForm,
-        'cuota-form':CuotaForm
+        PrestamoForm,CuotaForm,CobranzaForm
     },
     data() {
         return {
@@ -194,7 +208,26 @@ export default {
                 estado:'',
                 estado_clase:'',
                 pago:'',
+                fecha_cuota:'',
                 cuotas:[]
+            }),
+            cobranza: new form({
+                estadoCrud:'',
+                prestamo_id:'',
+                cliente:'',
+                cobrador:'',
+                fecha:'',
+                tipo_cambio:'',
+                moneda:'',
+                monto:'',
+                tasa_interes:'',
+                interes:'',
+                tipo_cuota:'',
+                numero_cuotas:'',
+                total:'',
+                saldo:'',
+                estado:'',
+                estado_clase:'',
             }),
             show_prestamos:'habilitados',
             busqueda:'',
@@ -252,9 +285,9 @@ export default {
             this.form.reset()
             this.form.clear()
         },
-        nuevo() {
+        nuevo(estado) {
             this.limpiar()
-            this.form.estadoCrud = 'crear'
+            this.form.estadoCrud = estado
         },
         mostrar(id) {
 
@@ -311,6 +344,11 @@ export default {
             $('#modal-cuota-title').html('Cuotas Préstamo')
             $('#modal-cuota').modal('show')
         },
+        nuevaCobranza(estado,id) {
+            this.cobranza.clear()
+            this.cobranza.reset()
+            this.cobranza.estadoCrud =estado
+        }
     }
 }
 </script>

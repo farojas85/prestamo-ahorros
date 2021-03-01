@@ -71,8 +71,22 @@
                                     </tr>
                                      <tr v-else-if="total>0" v-for="(cliente,index) in clientes.data" :key="cliente.id">
                                         <td class="text-center" v-text="(clientes.from+index)"></td>
-                                        <td :title="cliente.valoracion.nombre" class="text-center">
-                                            <i :class="cliente.valoracion.icono+' '+cliente.valoracion.clase"></i>
+                                        <td>
+                                            <span v-if="!cliente.fecha_cuota" class="text-purple">
+                                                <i class="fas fa-smile"></i> Regular
+                                            </span>
+                                            <span v-else-if="diferenciaDias(cliente.fecha_cuota) == 0" class="text-green">
+                                                <i class="fas fa-grin-stars"></i> Puntual
+                                            </span>
+                                            <span v-else-if="diferenciaDias(cliente.fecha_cuota) >=1 && diferenciaDias(cliente.fecha_cuota) <=2" class="text-blue">
+                                                <i class="fas fa-smile-beam"></i> Bueno
+                                            </span>
+                                            <span v-else-if="diferenciaDias(cliente.fecha_cuota) >=3 && diferenciaDias(cliente.fecha_cuota) <=5" class="text-purple">
+                                                <i class="fas fa-smile"></i> Regular
+                                            </span>
+                                             <span v-else-if="diferenciaDias(cliente.fecha_cuota) >5" class="text-danger">
+                                                <i class="fas fa-sad-tear"></i> Moroso
+                                            </span>
                                         </td>
                                         <td>
                                             <template v-for="cobrador in cliente.users">
@@ -167,6 +181,7 @@ export default {
                 estadoCrud:'',
                 valora:{},
                 usuario_id:this.$auth.user.id,
+                fecha_cuota:''
             }),
             show_clientes:'habilitados',
             buscar:'',
@@ -181,6 +196,17 @@ export default {
 
     },
     methods:{
+        diferenciaDias(fechaInicio)
+        {
+            var fecha1 = moment(fechaInicio).tz('America/Lima');
+            var fecha2 = moment(new Date()).tz('America/Lima');
+
+            if(fechaInicio == null || fechaInicio =='')
+            {
+                return null;
+            }
+            return fecha2.diff(fecha1,'days');
+        },
         listar(){
             axios.get('/api/cliente-'+this.show_clientes+'?pagina='+this.pagina+'&buscar='+this.buscar+'&usuario='+this.usuario_id,this.config)
             .then((respuesta) => {
@@ -243,6 +269,7 @@ export default {
                 this.cliente.valoracion = cliente.valoracion_id
                 this.cliente.user_id = cobrador.id
                 this.cliente.valora = valoracion
+                this.cliente.fecha_cuota = cliente.fecha_cuota
             })
         },
         mostrarCliente(id)

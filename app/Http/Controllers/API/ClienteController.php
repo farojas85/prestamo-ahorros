@@ -37,8 +37,6 @@ class ClienteController extends Controller
         //
     }
 
-
-
     public function habilitados(Request $request)
     {
         $buscar = strtoupper($request->buscar);
@@ -54,6 +52,11 @@ class ClienteController extends Controller
                         $q->select('id','nombres','apellidos','numero_documento');
                     },'valoracion:id,nombre,icono,clase',
                     'users.persona:id,nombres,apellidos'] )
+                    ->select('id','persona_id','valoracion_id','deleted_at',
+                    DB::Raw("(SELECT min(fecha_vencimiento) FROM cuotas cu
+                            INNER JOIN prestamos pe on pe.id = cu.prestamo_id
+                            WHERE pe.cliente_id = clientes.id
+                                and cu.estado_operacion_id = 2) as fecha_cuota"))
                     ->where(function($query) use($buscar){
                         $query->whereHas('persona',function($query) use($buscar){
                             $query->where(DB::Raw("concat(upper(nombres),' ',upper(apellidos))"),'like','%'.$buscar.'%')
@@ -79,6 +82,11 @@ class ClienteController extends Controller
         return Cliente::with(['persona:id,nombres,apellidos,numero_documento',
                             'valoracion:id,nombre,icono,clase',
                             'users.persona:id,nombres,apellidos'])
+                    ->select('id','persona_id','valoracion_id','deleted_at',
+                        DB::Raw("(SELECT min(fecha_vencimiento) FROM cuotas cu
+                                INNER JOIN prestamos pe on pe.id = cu.prestamo_id
+                                WHERE pe.cliente_id = clientes.id
+                                    and cu.estado_operacion_id = 2) as fecha_cuota"))
                     ->where(function($query) use($buscar){
                         $query->whereHas('persona',function($query) use($buscar){
                             $query->where(DB::Raw("concat(upper(nombres),' ',upper(apellidos))"),'like','%'.$buscar.'%')
@@ -105,6 +113,11 @@ class ClienteController extends Controller
         return Cliente::with(['persona:id,nombres,apellidos,numero_documento',
                                 'valoracion:id,nombre,icono,clase',
                                 'users.persona:id,nombres,apellidos'])
+                    ->select('id','persona_id','valoracion_id','deleted_at',
+                        DB::Raw("(SELECT min(fecha_vencimiento) FROM cuotas cu
+                                INNER JOIN prestamos pe on pe.id = cu.prestamo_id
+                                WHERE pe.cliente_id = clientes.id
+                                    and cu.estado_operacion_id = 2) as fecha_cuota"))
                     ->where(function($query) use($buscar){
                         $query->whereHas('persona',function($query) use($buscar){
                             $query->where(DB::Raw("concat(upper(nombres),' ',upper(apellidos))"),'like','%'.$buscar.'%')
@@ -282,7 +295,11 @@ class ClienteController extends Controller
      */
     public function show(Request $request)
     {
-        $cliente = Cliente::select('id','persona_id','valoracion_id')
+        $cliente = Cliente::select('id','persona_id','valoracion_id',
+                        DB::Raw("(SELECT min(fecha_vencimiento) FROM cuotas cu
+                        INNER JOIN prestamos pe on pe.id = cu.prestamo_id
+                        WHERE pe.cliente_id = clientes.id
+                            and cu.estado_operacion_id = 2) as fecha_cuota"))
                     ->where('id',$request->id)
                     ->first();
 
